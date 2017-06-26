@@ -1,5 +1,5 @@
 // Create div and ul to hold pagination buttons and append to bottom of
-// main content div
+// main content div.
 const mainDiv = document.querySelector('.page');
 const paginationDiv = document.createElement('div');
 paginationDiv.className = 'pagination';
@@ -7,7 +7,8 @@ const paginationList = document.createElement('ul');
 paginationDiv.appendChild(paginationList);
 mainDiv.appendChild(paginationDiv);
 
-// Create search div, input, and button and append to bottom of header div
+// Create search div, input, and button and append to bottom of header div.
+// Create a header element with display none to show when no search results found.
 const headerDiv = document.querySelector('.page-header');
 const searchDiv = document.createElement('div');
 const searchField = document.createElement('input');
@@ -18,9 +19,13 @@ searchButton.textContent = "Search";
 searchDiv.appendChild(searchField);
 searchDiv.appendChild(searchButton);
 headerDiv.appendChild(searchDiv);
+const noResults = document.createElement('h2');
+noResults.textContent = 'No Results Found';
+noResults.style.display = 'none';
+document.querySelector('.student-list').append(noResults);
 
 // Get all items to be paginated, set quantity per page, and determine how
-// many pages are needed to show all items
+// many pages are needed to show all items.
 const allStudents = document.querySelectorAll('.student-item');
 students = allStudents;
 let itemsPerPage = 10;
@@ -32,16 +37,28 @@ renderButtons();
 renderItems();
 
 // Add click event listener to search button
-  // create array of students to hold search results.
-  // if any student includes search query, add to students array.
-  // reset search field to blank.
-  // recalculate number of pages needed based on results.
-  // rerender buttons and items
 searchButton.addEventListener('click', () => {
+  search();
+});
+
+// Add keydown event listener to search field to respond to enter key
+searchField.addEventListener('keydown', (e) => {
+  if (e.which === 13){
+    console.log('pressed');
+    search();
+  }
+});
+
+// create array of students to hold search results.
+// if any student includes search query, add to students array.
+// reset search field to blank.
+// recalculate number of pages needed based on results.
+// rerender buttons and items
+function search(){
   students = [];
-  let search = searchField.value;
+  let query = searchField.value;
   for(let i = 0; i < allStudents.length; i++){
-    if (allStudents[i].innerText.includes(search)){
+    if (allStudents[i].innerText.includes(query)){
       students.push(allStudents[i]);
     }
   }
@@ -49,42 +66,45 @@ searchButton.addEventListener('click', () => {
   pages = Math.ceil(students.length/itemsPerPage);
   renderButtons();
   renderItems();
-});
+}
 
 // Iterate over number of pages, for each page create list item and an anchor
 // element. Append anchor to list item, append list item to pagination div.
 function renderButtons(){
   paginationList.innerHTML = '';
-  for(let i = 1; i <= pages; i++){
-    let item = document.createElement('li');
-    let link = document.createElement('a');
-    item.appendChild(link);
-    link.setAttribute('href', '#');
-    link.textContent = i;
-  // First page 'active' on page load
-    if(i === 1){
-      link.classList.add('active');
+  if(pages > 1){
+    for(let i = 1; i <= pages; i++){
+      let item = document.createElement('li');
+      let link = document.createElement('a');
+      item.appendChild(link);
+      link.setAttribute('href', '#');
+      link.textContent = i;
+    // First page 'active' on page load
+      if(i === 1){
+        link.classList.add('active');
+      }
+    // Add click event to anchor element:
+      // remove active class on all pagination buttons
+      // prevent default link behavior
+      // add active class back to clicked buttons
+      // set global page variable
+      // show/hide elements via render function
+      link.addEventListener('click', (e) => {
+        document.querySelector('.active').classList.remove('active');
+        e.preventDefault();
+        e.target.classList.add('active');
+        page = i;
+        renderItems();
+      });
+      paginationList.appendChild(item);
+      page = 1;
     }
-  // Add click event to anchor element:
-    // remove active class on all pagination buttons
-    // prevent default link behavior
-    // add active class back to clicked buttons
-    // set global page variable
-    // show/hide elements via render function
-    link.addEventListener('click', (e) => {
-      document.querySelector('.active').classList.remove('active');
-      e.preventDefault();
-      e.target.classList.add('active');
-      page = i;
-      renderItems();
-    });
-    paginationList.appendChild(item);
-    page = 1;
   }
 }
 
-// Hide all items
+// Hide all items including 'no resluts' message.
 function hidelist(){
+  noResults.style.display = 'none';
   for(let i = 0; i < allStudents.length; i++){
     allStudents[i].style.display = 'none';
   }
@@ -105,6 +125,6 @@ function renderItems(){
       }
     }
   } else {
-    console.log('no results');
+    noResults.style.display = 'block';
   }
 }
